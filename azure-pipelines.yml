@@ -7,7 +7,7 @@ trigger:
 - master
 
 pool:
-  name: 'deafult'
+  name: 'default'
   vmImage: 'windows-latest'
 
 variables:

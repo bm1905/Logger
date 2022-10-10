@@ -15,6 +15,7 @@ variables:
   revision: $[counter(variables['minor'], 1)] # This will get reset every time minor gets bumped.
   nugetVersion: '$(major).$(minor).$(revision)'
 
+name: 1.0.$(Rev:r)
 jobs:
 - job: BuildAndTest
   displayName: Build and Test
@@ -42,15 +43,14 @@ jobs:
     inputs:
       command: 'pack'
       packagesToPack: '$(project)'
-      versioningScheme: 'off'
-  - task: NuGetCommand@2
+      versioningScheme: 'byBuildNumber'
+  - task: DotNetCoreCLI@2
     displayName: dotnet push
     inputs:
       command: 'push'
       packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
       nuGetFeedType: 'internal'
       publishVstsFeed: '063bfe6a-f1c0-474d-bdb1-e6ef5a17ecbd/cb22b8c5-c32b-4931-b1f0-b60ce3fbd423'
-      allowPackageConflicts: true
   - task: PublishBuildArtifacts@1
     displayName: publish artifact
     inputs:

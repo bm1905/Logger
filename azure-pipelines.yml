@@ -1,35 +1,54 @@
-# ASP.NET
-# Build and test ASP.NET projects.
-# Add steps that publish symbols, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
-
 trigger:
 - master
 
 pool:
-  name: 'default'
+  name: 'shared-pool'
   vmImage: 'windows-latest'
 
 variables:
   solution: '**/*.sln'
+  project: '**/Logger.csproj'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
-steps:
-- task: NuGetToolInstaller@1
+jobs:
+- job: BuildAndTest
+  displayName: Build and Test
+  steps:
+  - task: NuGetCommand@2
+    displayName: dotnet restore
+    inputs:
+      command: 'restore'
+      restoreSolution: '$(solution)'
+      feedsToUse: 'select'
+      vstsFeed: '063bfe6a-f1c0-474d-bdb1-e6ef5a17ecbd/cb22b8c5-c32b-4931-b1f0-b60ce3fbd423'
+  - task: DotNetCoreCLI@2
+    displayName: dotnet build
+    inputs:
+      command: 'build'
+      projects: '$(solution)'
 
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '$(solution)'
-
-- task: VSBuild@1
-  inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-
-- task: VSTest@2
-  inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+- job: CreateNugetPackage
+  displayName: Create Nuget Package
+  dependsOn: BuildAndTest
+  condition: succeeded()
+  steps:
+  - task: DotNetCoreCLI@2
+    displayName: dotnet pack
+    inputs:
+      command: 'pack'
+      packagesToPack: '$(project)'
+      versioningScheme: 'off'
+  - task: DotNetCoreCLI@2
+    displayName: dotnet push
+    inputs:
+      command: 'push'
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+      nuGetFeedType: 'internal'
+      publishVstsFeed: '063bfe6a-f1c0-474d-bdb1-e6ef5a17ecbd/cb22b8c5-c32b-4931-b1f0-b60ce3fbd423'
+  - task: PublishBuildArtifacts@1
+    displayName: publish artifact
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      TargetPath: '\\Logger\$(Build.DefinitionName)\$(Build.BuildNumber)'
+      publishLocation: 'Container'

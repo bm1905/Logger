@@ -43,7 +43,7 @@ jobs:
       command: 'pack'
       packagesToPack: '$(project)'
       versioningScheme: 'byEnvVar'
-      versionEnvVar: 'PackageVersion'
+      versionEnvVar: '$(Build.BuildNumber)'
   - task: DotNetCoreCLI@2
     displayName: dotnet push
     inputs:

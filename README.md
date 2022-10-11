@@ -21,7 +21,7 @@ public static class Program
 }
 ```
 
-Then add the following to the configuration file `appsettings.YOUR ENV.json
+Then add the following to the configuration file `appsettings.YOUR ENV.json`
 ```json
 "Serilog": {
     "MinimumLevel": {

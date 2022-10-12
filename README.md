@@ -2,6 +2,7 @@
 This class library can be published as a Nuget or can be referenced directly in the project.
 
 ## Usage
+
 In `Program.cs` file, use the Serilog's UeSerilog hosting extension by providing the nuget configuration. `SeriLogger.Configure` comes from the nuget.
 ```cs
 public static class Program
@@ -35,4 +36,9 @@ Then add the following to the configuration file `appsettings.YOUR ENV.json`
 "ElasticConfiguration": {
     "Uri": "URI for elastic"
 }
+```
+If using just Program.cs file in .NET 6, then:
+```cs
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog(SeriLogger.Configure);
 ```

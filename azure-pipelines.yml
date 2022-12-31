@@ -20,6 +20,11 @@ jobs:
 - job: BuildAndTest
   displayName: Build and Test
   steps:
+  - task: NuGetToolInstaller@1
+    displayName: nuget installer
+    inputs:
+      versionSpec: 
+      checkLatest: true
   - task: NuGetCommand@2
     displayName: dotnet restore
     inputs:

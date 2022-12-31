@@ -5,66 +5,65 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace Logger
+namespace Logger;
+
+/// <summary>
+/// LoggingDelegatingHandler delegation handler
+/// </summary>
+public class LoggingDelegatingHandler : DelegatingHandler
 {
+    private readonly ILogger<LoggingDelegatingHandler> _logger;
+
     /// <summary>
-    /// LoggingDelegatingHandler delegation handler
+    /// LoggingDelegatingHandler constructor
     /// </summary>
-    public class LoggingDelegatingHandler : DelegatingHandler
+    /// <param name="logger">ILogger of type LoggingDelegatingHandler</param>
+    public LoggingDelegatingHandler(ILogger<LoggingDelegatingHandler> logger)
     {
-        private readonly ILogger<LoggingDelegatingHandler> _logger;
+        _logger = logger;
+    }
 
-        /// <summary>
-        /// LoggingDelegatingHandler constructor
-        /// </summary>
-        /// <param name="logger">ILogger of type LoggingDelegatingHandler</param>
-        public LoggingDelegatingHandler(ILogger<LoggingDelegatingHandler> logger)
+    /// <summary>
+    /// SendAsync method of DelegatingHandler class
+    /// </summary>
+    /// <param name="request">HttpRequestMessage</param>
+    /// <param name="cancellationToken">CancellationToken</param>
+    /// <returns>HttpResponseMessage Task</returns>
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        try
         {
-            _logger = logger;
-        }
+            _logger.LogInformation("Sending request to {Url}", request.RequestUri);
 
-        /// <summary>
-        /// SendAsync method of DelegatingHandler class
-        /// </summary>
-        /// <param name="request">HttpRequestMessage</param>
-        /// <param name="cancellationToken">CancellationToken</param>
-        /// <returns>HttpResponseMessage Task</returns>
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            try
+            var response = await base.SendAsync(request, cancellationToken);
+
+            if (response.IsSuccessStatusCode)
             {
-                _logger.LogInformation("Sending request to {Url}", request.RequestUri);
-
-                var response = await base.SendAsync(request, cancellationToken);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    _logger.LogInformation("Received a success response from {Url}", response.RequestMessage?.RequestUri);
-                }
-                else
-                {
-                    _logger.LogWarning("Received a non-success status code {StatusCode} from {Url}",
-                        (int)response.StatusCode, response.RequestMessage?.RequestUri);
-                }
-
-                return response;
+                _logger.LogInformation("Received a success response from {Url}", response.RequestMessage?.RequestUri);
             }
-            catch (HttpRequestException ex)
-                when (ex.InnerException is SocketException se && se.SocketErrorCode == SocketError.ConnectionRefused)
+            else
             {
-                var hostWithPort = request.RequestUri != null && request.RequestUri.IsDefaultPort
-                    ? request.RequestUri.DnsSafeHost
-                    : $"{request.RequestUri?.DnsSafeHost}:{request.RequestUri?.Port}";
-
-                _logger.LogCritical(ex, "Unable to connect to {Host}. Please check the " +
-                                       "configuration to ensure the correct URL for the service " +
-                                       "has been configured.", hostWithPort);
+                _logger.LogWarning("Received a non-success status code {StatusCode} from {Url}",
+                    (int)response.StatusCode, response.RequestMessage?.RequestUri);
             }
 
-            return new HttpResponseMessage(HttpStatusCode.BadGateway)
-            {
-                RequestMessage = request
-            };
+            return response;
         }
+        catch (HttpRequestException ex)
+            when (ex.InnerException is SocketException se && se.SocketErrorCode == SocketError.ConnectionRefused)
+        {
+            var hostWithPort = request.RequestUri != null && request.RequestUri.IsDefaultPort
+                ? request.RequestUri.DnsSafeHost
+                : $"{request.RequestUri?.DnsSafeHost}:{request.RequestUri?.Port}";
+
+            _logger.LogCritical(ex, "Unable to connect to {Host}. Please check the " +
+                                    "configuration to ensure the correct URL for the service " +
+                                    "has been configured.", hostWithPort);
+        }
+
+        return new HttpResponseMessage(HttpStatusCode.BadGateway)
+        {
+            RequestMessage = request
+        };
     }
 }

@@ -4,37 +4,36 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Sinks.Elasticsearch;
 
-namespace Logger
+namespace Logger;
+
+/// <summary>
+/// SeriLogger static class
+/// </summary>
+public static class SeriLogger
 {
     /// <summary>
-    /// SeriLogger static class
+    /// Configure Action
     /// </summary>
-    public static class SeriLogger
-    {
-        /// <summary>
-        /// Configure Action
-        /// </summary>
-        public static Action<HostBuilderContext, LoggerConfiguration> Configure =>
-            (context, configuration) =>
-            {
-                var elasticUri = context.Configuration.GetValue<string>("ElasticConfiguration:Uri");
+    public static Action<HostBuilderContext, LoggerConfiguration> Configure =>
+        (context, configuration) =>
+        {
+            var elasticUri = context.Configuration.GetValue<string>("ElasticConfiguration:Uri");
 
-                configuration
-                    .Enrich.FromLogContext()
-                    .Enrich.WithMachineName()
-                    .WriteTo.Debug()
-                    .WriteTo.Console()
-                    .WriteTo.Elasticsearch(
-                        new ElasticsearchSinkOptions(new Uri(elasticUri))
-                        {
-                            IndexFormat = $"applogs-{context.HostingEnvironment.ApplicationName?.ToLower().Replace(".", "-")}-{context.HostingEnvironment.EnvironmentName?.ToLower().Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM}",
-                            AutoRegisterTemplate = true,
-                            NumberOfShards = 2,
-                            NumberOfReplicas = 1
-                        })
-                    .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName)
-                    .Enrich.WithProperty("Application", context.HostingEnvironment.ApplicationName)
-                    .ReadFrom.Configuration(context.Configuration);
-            };
-    }
+            configuration
+                .Enrich.FromLogContext()
+                .Enrich.WithMachineName()
+                .WriteTo.Debug()
+                .WriteTo.Console()
+                .WriteTo.Elasticsearch(
+                    new ElasticsearchSinkOptions(new Uri(elasticUri))
+                    {
+                        IndexFormat = $"applogs-{context.HostingEnvironment.ApplicationName?.ToLower().Replace(".", "-")}-{context.HostingEnvironment.EnvironmentName?.ToLower().Replace(".", "-")}-{DateTime.UtcNow:yyyy-MM}",
+                        AutoRegisterTemplate = true,
+                        NumberOfShards = 2,
+                        NumberOfReplicas = 1
+                    })
+                .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName)
+                .Enrich.WithProperty("Application", context.HostingEnvironment.ApplicationName)
+                .ReadFrom.Configuration(context.Configuration);
+        };
 }

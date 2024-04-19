@@ -1,14 +1,13 @@
 ﻿using System;
-using Logger.Base;
 
-namespace Logger
+namespace Logger.Base
 {
     public class DependencyOperation : IDisposable
     {
         private Dependency Dependency { get; }
-        private readonly IInstrumentationClient _client;
+        private readonly ILogger _client;
 
-        public DependencyOperation(IInstrumentationClient client, string name, string operation, Property property)
+        public DependencyOperation(ILogger client, string name, string operation, Property property)
         {
             Dependency = new Dependency(name, operation, property);
             _client = client;

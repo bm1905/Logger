@@ -8,6 +8,7 @@ pool:
 variables:
   solution: '**/*.sln'
   project: '**/Logger.csproj'
+  testProject: '**/Logger.Test.csproj'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
@@ -32,4 +33,10 @@ jobs:
     inputs:
       command: 'build'
       projects: '$(solution)'
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet test
+    inputs:
+      command: 'test'
+      projects: '$(testProject)'
   

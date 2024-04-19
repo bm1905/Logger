@@ -10,7 +10,7 @@ namespace Logger.Test
         public async Task TestForSuccessfulDependency()
         {
             // Arrange
-            Mock<IInstrumentationClient> mockClient = new();
+            Mock<ILogger> mockClient = new();
             Property property = new(new Dictionary<string, string> { { "TestProperty", "TestValue" } });
             mockClient
                 .Setup(client => client.Start(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Property>()))
@@ -25,7 +25,7 @@ namespace Logger.Test
         public async Task TestForFailedDependency()
         {
             // Arrange
-            Mock<IInstrumentationClient> mockClient = new();
+            Mock<ILogger> mockClient = new();
             Property property = new(new Dictionary<string, string> { { "TestProperty", "TestValue" } });
             mockClient
                 .Setup(client => client.Start(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Property>()))

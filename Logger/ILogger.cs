@@ -3,7 +3,7 @@ using Logger.Base;
 
 namespace Logger
 {
-    public interface IInstrumentationClient
+    public interface ILogger
     {
         Task Information(Message message);
         Task Warning(Message message);

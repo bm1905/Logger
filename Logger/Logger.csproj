@@ -8,9 +8,13 @@
     <Title>Azure Application Insights Logger</Title>
     <Description>Azure Application Insights Logger</Description>
     <PackageReleaseNotes>Azure Application Insights Logger</PackageReleaseNotes>
-    <Version>1.0.0.1</Version>
-    <AssemblyVersion>1.0.0.1</AssemblyVersion>
-    <FileVersion>1.0.0.1</FileVersion>
+    <Version>1.0.0.2</Version>
+    <AssemblyVersion>1.0.0.2</AssemblyVersion>
+    <FileVersion>1.0.0.2</FileVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ApplicationInsights" Version="2.22.0" />
+  </ItemGroup>
 
 </Project>

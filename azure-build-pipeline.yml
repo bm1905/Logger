@@ -1,0 +1,35 @@
+trigger:
+- dev
+
+pool:
+  name: 'shared-pool'
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  project: '**/Logger.csproj'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+jobs:
+- job: BuildAndTest
+  displayName: Build and Test
+  steps:
+  - task: NuGetToolInstaller@1
+    displayName: nuget installer
+    inputs:
+      versionSpec: 
+      checkLatest: true
+  - task: NuGetCommand@2
+    displayName: dotnet restore
+    inputs:
+      command: 'restore'
+      restoreSolution: '$(solution)'
+      feedsToUse: 'select'
+      vstsFeed: 'bba3d55c-7ef9-4bfe-80bd-2381616bf711'
+  - task: DotNetCoreCLI@2
+    displayName: dotnet build
+    inputs:
+      command: 'build'
+      projects: '$(solution)'
+  

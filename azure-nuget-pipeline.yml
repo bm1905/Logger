@@ -1,0 +1,46 @@
+trigger: none
+
+pool:
+  name: 'shared-pool'
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  project: '**/Logger.csproj'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+jobs:
+- job: CreateNugetPackage
+  displayName: Create Nuget Package
+  steps:
+  - task: NuGetAuthenticate@1
+  - task: DotNetCoreCLI@2
+    displayName: dotnet build
+    inputs:
+      command: 'build'
+      arguments: '--configuration $(buildConfiguration)'
+      projects: '$(project)'
+  - task: DotNetCoreCLI@2
+    displayName: dotnet pack
+    inputs:
+      command: 'pack'
+      packagesToPack: '$(project)'
+      nobuild: true
+      versioningScheme: 'off'
+  - task: DotNetCoreCLI@2
+    displayName: dotnet push
+    inputs:
+      command: 'push'
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+      nuGetFeedType: 'internal'
+      publishVstsFeed: 'bba3d55c-7ef9-4bfe-80bd-2381616bf711'
+      versioningScheme: 'off'
+      allowPackageConflicts: true
+  - task: PublishBuildArtifacts@1
+    displayName: publish artifact
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      TargetPath: '\\Shared.Models\$(Build.DefinitionName)\$(Build.BuildNumber)'
+      publishLocation: 'Container'
+  
